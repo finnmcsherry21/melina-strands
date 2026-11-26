@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Melina Strands ♥</title>
+<script>
+/* ======================================================================
+   ✏️  EDIT YOUR PUZZLES HERE  ✏️
+   ----------------------------------------------------------------------
+   Each puzzle needs:
+     theme      – the hint shown at the top of the board
+     spangram   – the special word that stretches edge-to-edge (turns yellow)
+     words      – the other hidden words (turn light blue)
+     winMessage – the note Melina sees when she finishes (use \n for a new line)
+   Optional:
+     title      – short name shown in the puzzle list (defaults to the theme)
+     seed       – any number; change it to get a different letter layout
+     rows/cols  – grid size for just this puzzle (defaults to SETTINGS below)
+
+   THE ONE RULE: all letters (spangram + words) must add up to exactly
+   rows × cols  (8 × 6 = 48). Spaces, apostrophes and dashes are ignored,
+   so "Coke Zero" counts as 8 letters. If the count is off, the game shows
+   a friendly message telling you how many letters to add or remove.
+
+   The letter grid is built automatically from these words – just save
+   the file and refresh the page.
+   ====================================================================== */
+const SETTINGS = {
+  rows: 8,               // grid height
+  cols: 6,               // grid width
+  guessesPerHint: 3,     // wrong 4+ letter guesses needed to earn a hint
+  freeHints: 1,          // hints available at the start of every puzzle
+  fromName: "Finn",      // signature on the win screen
+};
+
+const PUZZLES = [
+  {
+    title: "Things I love about you",
+    theme: "Things I love about you",
+    spangram: "I love Melina",
+    words: ["Smile", "Laugh", "Kind", "Cute", "Beautiful", "Funny", "Smart"],
+    winMessage: "You found them all — but honestly there are way more than 7 things.\nI love you more than In-N-Out loves animal style. ♥",
+  },
+  {
+    title: "Melina's sweet tooth",
+    theme: "Melina's sweet tooth",
+    spangram: "Sweet tooth",
+    words: ["Lifesaver", "Licorice", "Lava cake", "Brownie", "Haribo"],
+    winMessage: "Sweetest girl, sweetest tooth.\nLava cake with vanilla ice cream is on me this week. 🍫",
+  },
+  {
+    title: "Sip sip hooray",
+    theme: "Sip sip hooray!",
+    spangram: "Sip sip hooray",
+    words: ["Root beer", "Celsius", "Thai tea", "Latte", "Jager bomb"],
+    winMessage: "Cheers to you! 🥂\nNext round of lavender vanilla lattes (or Jäger bombs…) is on me.",
+  },
+  {
+    title: "Dinner date",
+    theme: "Dinner date",
+    spangram: "Dinner date",
+    words: ["Scallops", "Alfredo", "Rotini", "Bowtie", "Curry", "Caesar"],
+    winMessage: "Pick the place — Nate's on Marsh, Giuseppe's, or Taste — and it's a date. 🍝",
+  },
+  {
+    title: "Order like Melina",
+    theme: "Order like Melina (it's complicated)",
+    spangram: "Double double",
+    words: ["In N Out", "Protein", "Onion", "Sauce", "Fries", "Coke Zero"],
+    winMessage: "Double double, protein style, onions, 2 extra sauces, normal fries,\nand a drink that is \"2/3 Diet Coke, 1/3 Coke\" but actually 100% Coke Zero.\nI'd memorize it a hundred times over. 🍔",
+  },
+  {
+    title: "Juicy",
+    theme: "Watermelon on top",
+    spangram: "Fruit bowl",
+    words: ["Watermelon", "Nectarine", "Pineapple", "Cherry", "Mango"],
+    winMessage: "Whatever's in season, I'm picking you. 🍉",
+  },
+];
+/* ======================================================================
+   🚫  You don't need to edit anything below this line.
+   ====================================================================== */
+</script>
+<style>
+  :root{
+    --blue:#aedfee; --yellow:#f8cd05; --sel:#dbd8c5; --ink:#121212; --muted:#6b6b6b;
+    --bg:#ffffff; --card:#f4f1e8; --line:#e3e3e3; --heart:#e8457a;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0; height:100%; background:var(--bg); color:var(--ink);
+    font-family:"Libre Franklin","Franklin Gothic Medium","Helvetica Neue",Helvetica,Arial,sans-serif;
+    overscroll-behavior:none}
+  body{display:flex; flex-direction:column; min-height:100dvh}
+  button{font-family:inherit; color:inherit}
+  header{display:flex; align-items:center; justify-content:space-between; padding:10px 14px;
+    border-bottom:1px solid var(--line); padding-top:max(10px, env(safe-area-inset-top))}
+  header h1{font-family:Georgia,"Times New Roman",serif; font-size:20px; margin:0; font-weight:700; letter-spacing:.2px}
+  header h1 .h{color:var(--heart)}
+  .iconbtn{background:none; border:0; font-size:22px; width:40px; height:40px; border-radius:50%; cursor:pointer; display:grid; place-items:center}
+  .iconbtn:hover{background:#f2f2f2}
+  main{flex:1; display:flex; flex-direction:column; align-items:center; padding:12px 14px calc(14px + env(safe-area-inset-bottom)); gap:10px; width:100%; max-width:560px; margin:0 auto}
+  .theme{width:100%; max-width:380px; border-radius:10px; overflow:hidden; border:1px solid #cfe9f2; text-align:center}
+  .theme .lbl{background:var(--blue); font-size:12px; font-weight:700; letter-spacing:1.2px; padding:5px; text-transform:uppercase}
+  .theme .txt{font-size:19px; font-weight:700; padding:10px 8px}
+  .puzname{font-size:12px; color:var(--muted); margin-top:-4px}
+  .current{height:36px; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:700;
+    letter-spacing:2px; text-transform:uppercase; transition:opacity .2s}
+  .current.msg{font-size:17px; letter-spacing:.3px; text-transform:none; font-weight:600}
+  .current.bad{animation:shake .35s}
+  .current.good{color:#1a7fa3} .current.span{color:#b08f00}
+  @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+  .boardwrap{position:relative; width:min(100%, 420px, calc((100dvh - 300px) * var(--cols) / var(--rows))); min-width:240px;
+    aspect-ratio: var(--cols) / var(--rows); touch-action:none; user-select:none; -webkit-user-select:none}
+  .boardwrap svg{position:absolute; inset:0; width:100%; height:100%; pointer-events:none}
+  .grid{position:absolute; inset:0; display:grid; grid-template-columns:repeat(var(--cols),1fr); grid-template-rows:repeat(var(--rows),1fr)}
+  .cell{display:grid; place-items:center; cursor:pointer}
+  .cell span{width:78%; aspect-ratio:1; border-radius:50%; display:grid; place-items:center; font-size:clamp(18px, 6.2vw, 28px);
+    font-weight:600; text-transform:uppercase; transition:background .15s, transform .15s; position:relative; z-index:1}
+  .cell.sel span{background:var(--sel)}
+  .cell.found span{background:var(--blue)}
+  .cell.spang span{background:var(--yellow)}
+  .cell.hint span{outline:2.5px dashed #1a7fa3; outline-offset:-2px}
+  .cell.pop span{animation:pop .35s}
+  @keyframes pop{50%{transform:scale(1.18)}}
+  .bottom{display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; max-width:380px}
+  .count{font-size:15px} .count b{font-weight:800}
+  .hintbtn{position:relative; overflow:hidden; border:1.5px solid var(--ink); background:#fff; border-radius:999px; padding:9px 22px; font-size:15px; font-weight:700; cursor:pointer; min-width:96px}
+  .hintbtn .fill{position:absolute; left:0; top:0; bottom:0; background:#e6e6e6; z-index:0; transition:width .3s}
+  .hintbtn.ready{background:var(--blue)} .hintbtn.ready .fill{display:none}
+  .hintbtn:disabled{cursor:default; color:#888; border-color:#bbb}
+  .hintbtn span{position:relative; z-index:1}
+  .hearts{font-size:12px; color:var(--heart); letter-spacing:6px; opacity:.7}
+  .error{max-width:420px; background:#fff4f4; border:1px solid #f0c2c2; border-radius:12px; padding:16px 18px; line-height:1.45; font-size:15px}
+  .error h3{margin:0 0 6px} .error ul{padding-left:20px; margin:8px 0} .error code{background:#fff; padding:1px 5px; border-radius:4px; border:1px solid #eee}
+  /* modals */
+  .overlay{position:fixed; inset:0; background:rgba(255,255,255,.72); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:20; padding:18px}
+  .overlay.show{display:flex}
+  .modal{background:#fff; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.18); width:100%; max-width:400px; max-height:88dvh; overflow:auto; padding:22px 20px; position:relative}
+  .modal h2{font-family:Georgia,serif; margin:0 0 12px; font-size:24px}
+  .close{position:absolute; top:10px; right:10px}
+  .plist{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px}
+  .plist button{width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 14px; border-radius:10px; border:1px solid var(--line); background:#fff; font-size:16px; cursor:pointer}
+  .plist button:hover{background:#fafafa}
+  .plist button.cur{border-color:var(--ink); border-width:2px}
+  .plist .st{font-size:13px; color:var(--muted); white-space:nowrap}
+  .plist .done .st{color:#1a7fa3; font-weight:700}
+  .row{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap}
+  .btn{flex:1; border-radius:999px; padding:12px 16px; font-size:16px; font-weight:700; cursor:pointer; border:1.5px solid var(--ink); background:#fff}
+  .btn.primary{background:var(--ink); color:#fff}
+  .btn.small{flex:none; padding:7px 14px; font-size:13px}
+  .win{text-align:center}
+  .win .big{font-size:44px; line-height:1}
+  .win .msg{white-space:pre-line; font-size:17px; line-height:1.5; margin:12px 0 6px}
+  .win .sig{font-family:Georgia,serif; font-style:italic; font-size:18px}
+  .win .chips{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:12px}
+  .chip{background:var(--blue); border-radius:999px; padding:4px 10px; font-size:13px; font-weight:700; text-transform:uppercase}
+  .chip.spang{background:var(--yellow)}
+  .help p{line-height:1.5; margin:8px 0}
+  .floatheart{position:fixed; bottom:-30px; font-size:24px; pointer-events:none; z-index:30; animation:floatup 3s ease-in forwards}
+  @keyframes floatup{to{transform:translateY(-110dvh) rotate(25deg); opacity:0}}
+  @media (min-width:700px){ .cell span{font-size:28px} main{padding-top:20px} }
+</style>
+</head>
+<body>
+<header>
+  <button class="iconbtn" id="menuBtn" aria-label="Choose puzzle">☰</button>
+  <h1>Melina Strands <span class="h">♥</span></h1>
+  <button class="iconbtn" id="helpBtn" aria-label="How to play">?</button>
+</header>
+<main id="main"></main>
+
+<div class="overlay" id="pickerOv"><div class="modal">
+  <button class="iconbtn close" data-close>✕</button>
+  <h2>Puzzles</h2>
+  <ul class="plist" id="plist"></ul>
+  <div class="row"><button class="btn small" id="resetBtn">Restart this puzzle</button></div>
+</div></div>
+
+<div class="overlay" id="helpOv"><div class="modal help">
+  <button class="iconbtn close" data-close>✕</button>
+  <h2>How to play</h2>
+  <p>Find the hidden words that fit the theme. Drag (or tap letter by letter, then tap the last letter again) to connect letters — up, down, sideways or diagonally.</p>
+  <p><b style="background:var(--blue);padding:1px 6px;border-radius:5px">Blue</b> = theme word. <b style="background:var(--yellow);padding:1px 6px;border-radius:5px">Yellow</b> = the <b>spangram</b>, which describes the theme and touches two opposite sides of the board.</p>
+  <p>Every letter is used exactly once. Stuck? Every 3 wrong guesses of 4+ letters earns a hint ♥</p>
+</div></div>
+
+<div class="overlay" id="winOv"><div class="modal win">
+  <button class="iconbtn close" data-close>✕</button>
+  <div class="big">💛💙</div>
+  <h2 id="winTitle">You did it!</h2>
+  <div class="msg" id="winMsg"></div>
+  <div class="sig" id="winSig"></div>
+  <div class="chips" id="winChips"></div>
+  <div class="row"><button class="btn" id="winPick">All puzzles</button><button class="btn primary" id="winNext">Next puzzle →</button></div>
+</div></div>
+
+<script>
+// === GENERATOR START ===
+// Pure functions (no DOM) – also used by the node test script.
+function cleanWord(w){ return String(w == null ? "" : w).toUpperCase().normalize("NFD").replace(/[^A-Z]/g, ""); }
+function hashStr(s){ let h = 2166136261 >>> 0; for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function mulberry32(a){ return function(){ a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function shuffle(arr, rng){ for (let i = arr.length - 1; i > 0; i--){ const j = Math.floor(rng() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+
+function validatePuzzle(p, settings){
+  const rows = (p && p.rows) || settings.rows, cols = (p && p.cols) || settings.cols;
+  const errors = [];
+  const spangram = cleanWord(p && p.spangram);
+  const rawWords = (p && Array.isArray(p.words)) ? p.words : [];
+  const words = rawWords.map(cleanWord).filter(Boolean);
+  if (!p || !p.theme) errors.push("This puzzle is missing a <code>theme</code> (the hint text).");
+  if (!spangram) errors.push("This puzzle is missing a <code>spangram</code>.");
+  if (!words.length) errors.push("This puzzle has no <code>words</code>.");
+  const all = spangram ? [spangram, ...words] : words;
+  const seen = new Set();
+  for (const w of all){ if (seen.has(w)) errors.push(`The word <code>${w}</code> is listed twice.`); seen.add(w); }
+  for (const w of all) if (w.length < 3) errors.push(`<code>${w}</code> is too short — words need at least 3 letters (4+ is best).`);
+  const total = all.reduce((s, w) => s + w.length, 0), need = rows * cols;
+  if (total !== need){
+    const diff = total - need;
+    errors.push(`The words add up to <b>${total}</b> letters, but a ${rows}×${cols} grid needs exactly <b>${need}</b>. ` +
+      (diff > 0 ? `Remove <b>${diff}</b> letter${diff === 1 ? "" : "s"} (shorten or drop a word).` : `Add <b>${-diff}</b> more letter${diff === -1 ? "" : "s"} (add or lengthen a word).`));
+  }
+  if (spangram && spangram.length < Math.min(rows, cols)) errors.push(`The spangram <code>${spangram}</code> needs at least ${Math.min(rows, cols)} letters to reach from one side of the board to the other.`);
+  return { ok: errors.length === 0, errors, rows, cols, spangram, words, total, need };
+}
+
+// Builds a layout: a random non-self-crossing path that visits every cell once
+// (8-directional moves), cut into word-length pieces. The spangram's piece must
+// touch two opposite edges. Deterministic for a given seed.
+function generateLayout(spangram, words, rows, cols, seed){
+  const N = rows * cols, rng = mulberry32(seed >>> 0);
+  const rc = i => [Math.floor(i / cols), i % cols];
+  const nbrs = [];
+  for (let i = 0; i < N; i++){ const [r, c] = rc(i), list = [];
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++){ if (!dr && !dc) continue; const rr = r + dr, cc = c + dc;
+      if (rr >= 0 && rr < rows && cc >= 0 && cc < cols) list.push(rr * cols + cc); }
+    nbrs.push(list); }
+  const ekey = (a, b) => a < b ? a * N + b : b * N + a;
+
+  function hamPath(budget){
+    const visited = new Uint8Array(N), path = [], edges = new Set(); let steps = 0;
+    const crossKey = (a, b) => { const [r1, c1] = rc(a), [r2, c2] = rc(b); if (r1 === r2 || c1 === c2) return -1; return ekey(r1 * cols + c2, r2 * cols + c1); };
+    const freeDeg = i => { let d = 0; for (const n of nbrs[i]) if (!visited[n]) d++; return d; };
+    function connected(head, remaining){
+      if (!remaining) return true;
+      const seen = new Uint8Array(N), stack = [head]; seen[head] = 1; let cnt = 0;
+      while (stack.length){ const x = stack.pop(); for (const n of nbrs[x]) if (!visited[n] && !seen[n]){ seen[n] = 1; cnt++; stack.push(n); } }
+      return cnt === remaining;
+    }
+    function dfs(cur){
+      if (path.length === N) return true;
+      if (++steps > budget) return false;
+      const remaining = N - path.length;
+      if (!connected(cur, remaining)) return false;
+      // dead-end pruning: at most one unvisited cell may have <=1 free neighbour (it must be the end)
+      let deadEnds = 0;
+      for (let i = 0; i < N; i++) if (!visited[i]){ let d = freeDeg(i); if (nbrs[i].includes(cur)) d++; if (d <= 1 && ++deadEnds > 1) return false; }
+      const cands = nbrs[cur].filter(n => !visited[n]).map(n => ({ n, k: freeDeg(n) + rng() * 2.5 }));
+      cands.sort((a, b) => a.k - b.k);
+      for (const { n } of cands){
+        const ck = crossKey(cur, n); if (ck >= 0 && edges.has(ck)) continue;
+        const ek = ekey(cur, n);
+        visited[n] = 1; path.push(n); edges.add(ek);
+        if (dfs(n)) return true;
+        visited[n] = 0; path.pop(); edges.delete(ek);
+        if (steps > budget) return false;
+      }
+      return false;
+    }
+    const start = Math.floor(rng() * N); visited[start] = 1; path.push(start);
+    return dfs(start) ? path : null;
+  }
+  const spans = cells => {
+    let top = false, bot = false, left = false, right = false;
+    for (const i of cells){ const [r, c] = rc(i); if (r === 0) top = true; if (r === rows - 1) bot = true; if (c === 0) left = true; if (c === cols - 1) right = true; }
+    return (top && bot) || (left && right);
+  };
+  for (let attempt = 0; attempt < 200; attempt++){
+    const path = hamPath(20000);
+    if (!path) continue;
+    for (let k = 0; k < 60; k++){
+      const order = shuffle([spangram, ...words], rng);
+      let pos = 0, ok = true; const paths = {};
+      for (const w of order){
+        let seg = path.slice(pos, pos + w.length); pos += w.length;
+        if (rng() < 0.5) seg = seg.reverse();
+        if (w === spangram && !spans(seg)){ ok = false; break; }
+        paths[w] = seg;
+      }
+      if (!ok) continue;
+      const grid = new Array(N);
+      for (const w in paths) paths[w].forEach((cell, i) => { grid[cell] = w[i]; });
+      return { grid, paths, attempts: attempt + 1 };
+    }
+  }
+  return null;
+}
+
+function puzzleSeed(p, v){ return (typeof p.seed === "number" ? p.seed : 0) ^ hashStr([v.rows, v.cols, v.spangram, ...v.words].join("|")); }
+function preparePuzzle(p, settings){
+  const v = validatePuzzle(p, settings);
+  if (!v.ok) return v;
+  const layout = generateLayout(v.spangram, v.words, v.rows, v.cols, puzzleSeed(p, v));
+  if (!layout) return { ...v, ok: false, errors: ["Couldn't fit these words into the grid — try changing the <code>seed</code> number or swapping a word."] };
+  return { ...v, ...layout };
+}
+function areAdjacent(a, b, cols){ const r1 = Math.floor(a / cols), c1 = a % cols, r2 = Math.floor(b / cols), c2 = b % cols; return a !== b && Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1; }
+// Judges a traced path of cell indexes against the puzzle. Returns {type, word}
+function judgeSelection(prep, cells, foundSet){
+  const word = cells.map(i => prep.grid[i]).join("");
+  if (cells.length < 4 && !(prep.paths[word] && cells.length === word.length)) return { type: "short", word };
+  const target = prep.paths[word];
+  if (target){
+    if (foundSet.has(word)) return { type: "already", word };
+    if (target.length === cells.length && target.every((c, i) => c === cells[i])) return { type: word === prep.spangram ? "spangram" : "theme", word };
+    return { type: "wrongspot", word };
+  }
+  return { type: "guess", word };
+}
+// === GENERATOR END ===
+
+if (typeof window !== "undefined") (function(){
+  const $ = s => document.querySelector(s);
+  const prepared = PUZZLES.map(p => preparePuzzle(p, SETTINGS));
+  const LS = "melinaStrands.";
+  const store = { get(k, d){ try { const v = localStorage.getItem(LS + k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+                  set(k, v){ try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch(e){} } };
+  const keyFor = i => { const p = prepared[i]; return "p." + hashStr(JSON.stringify([PUZZLES[i].theme, p.spangram, p.words, p.rows, p.cols, PUZZLES[i].seed || 0])); };
+  const loadProg = i => store.get(keyFor(i), { found: [], guesses: [], hintsUsed: 0, hintWord: null });
+  let cur = Math.min(store.get("current", 0), PUZZLES.length - 1); if (cur < 0) cur = 0;
+  let prog, prep, sel = [], msgTimer = null;
+
+  function save(){ store.set(keyFor(cur), prog); store.set("current", cur); }
+  function hintsAvailable(){ return SETTINGS.freeHints + Math.floor(prog.guesses.length / SETTINGS.guessesPerHint) - prog.hintsUsed; }
+  function totalWords(){ return prep.words.length + 1; }
+
+  function render(){
+    prep = prepared[cur]; prog = loadProg(cur); sel = [];
+    const m = $("#main"); m.innerHTML = "";
+    const P = PUZZLES[cur];
+    const theme = document.createElement("div"); theme.className = "theme";
+    theme.innerHTML = `<div class="lbl">Today's theme</div><div class="txt"></div>`;
+    theme.querySelector(".txt").textContent = P.theme || "(no theme)";
+    m.appendChild(theme);
+    const nm = document.createElement("div"); nm.className = "puzname"; nm.textContent = `Puzzle ${cur + 1} of ${PUZZLES.length}`; m.appendChild(nm);
+    if (!prep.ok){
+      const e = document.createElement("div"); e.className = "error";
+      e.innerHTML = `<h3>Oops — this puzzle needs a tweak 🛠️</h3><ul>${prep.errors.map(x => `<li>${x}</li>`).join("")}</ul>` +
+        (prep.spangram || prep.words.length ? `<div style="font-size:13px;color:#555">Letter counts: ${[prep.spangram, ...prep.words].filter(Boolean).map(w => `${w} (${w.length})`).join(", ")}</div>` : "") +
+        `<div style="margin-top:10px;font-size:13px;color:#555">Edit the <code>PUZZLES</code> list at the top of <code>index.html</code>, save, and refresh.</div>`;
+      m.appendChild(e);
+      return;
+    }
+    const curEl = document.createElement("div"); curEl.className = "current"; curEl.id = "current"; m.appendChild(curEl);
+    const wrap = document.createElement("div"); wrap.className = "boardwrap"; wrap.id = "board";
+    wrap.style.setProperty("--cols", prep.cols); wrap.style.setProperty("--rows", prep.rows);
+    wrap.innerHTML = `<svg viewBox="0 0 ${prep.cols} ${prep.rows}" preserveAspectRatio="none"></svg><div class="grid"></div>`;
+    const g = wrap.querySelector(".grid");
+    prep.grid.forEach((ch, i) => { const d = document.createElement("div"); d.className = "cell"; d.dataset.i = i; d.innerHTML = `<span>${ch}</span>`; g.appendChild(d); });
+    m.appendChild(wrap);
+    const bottom = document.createElement("div"); bottom.className = "bottom";
+    bottom.innerHTML = `<button class="hintbtn" id="hintBtn"><div class="fill"></div><span>Hint</span></button><div class="count" id="count"></div>`;
+    m.appendChild(bottom);
+    const hearts = document.createElement("div"); hearts.className = "hearts"; hearts.textContent = "♥ ♥ ♥"; m.appendChild(hearts);
+    $("#hintBtn").onclick = useHint;
+    bindBoard(wrap);
+    paint(); showMsg("", "");
+    if (isDone()) setTimeout(() => showWin(false), 250);
+  }
+
+  function isDone(){ return prep.ok && prog.found.length >= totalWords(); }
+  function cellOwner(){ const own = {}; for (const w of prog.found) for (const c of prep.paths[w]) own[c] = w; return own; }
+
+  function paint(){
+    const own = cellOwner(), board = $("#board"); if (!board) return;
+    const hintCells = new Set(prog.hintWord && !prog.found.includes(prog.hintWord) ? prep.paths[prog.hintWord] : []);
+    board.querySelectorAll(".cell").forEach(el => { const i = +el.dataset.i, w = own[i];
+      el.classList.toggle("found", !!w && w !== prep.spangram); el.classList.toggle("spang", w === prep.spangram);
+      el.classList.toggle("sel", sel.includes(i)); el.classList.toggle("hint", hintCells.has(i)); });
+    const svg = board.querySelector("svg"); let html = "";
+    const pt = i => `${(i % prep.cols) + 0.5},${Math.floor(i / prep.cols) + 0.5}`;
+    const poly = (cells, color) => cells.length > 1 ? `<polyline points="${cells.map(pt).join(" ")}" fill="none" stroke="${color}" stroke-width="0.17" stroke-linecap="round" stroke-linejoin="round"/>` : "";
+    for (const w of prog.found) html += poly(prep.paths[w], w === prep.spangram ? "#f8cd05" : "#aedfee");
+    html += poly(sel, "#dbd8c5");
+    svg.innerHTML = html;
+    const c = $("#count"); c.innerHTML = `<b>${prog.found.filter(w => w !== prep.spangram).length + (prog.found.includes(prep.spangram) ? 1 : 0)}</b> of <b>${totalWords()}</b> theme words found.`;
+    const hb = $("#hintBtn"), avail = hintsAvailable(), active = prog.hintWord && !prog.found.includes(prog.hintWord);
+    hb.classList.toggle("ready", avail > 0 && !active && !isDone());
+    hb.disabled = isDone() || active || avail <= 0;
+    hb.querySelector(".fill").style.width = avail > 0 ? "100%" : `${(prog.guesses.length % SETTINGS.guessesPerHint) / SETTINGS.guessesPerHint * 100}%`;
+    hb.querySelector("span").textContent = avail > 1 && !active ? `Hint ×${avail}` : "Hint";
+    hb.title = active ? "Find the outlined word first" : avail > 0 ? "Show the letters of a word" : `${SETTINGS.guessesPerHint - prog.guesses.length % SETTINGS.guessesPerHint} more guesses (4+ letters) to earn a hint`;
+    if (sel.length) showCurrentWord();
+  }
+  function showCurrentWord(){ const el = $("#current"); if (!el) return; clearTimeout(msgTimer); el.className = "current"; el.textContent = sel.map(i => prep.grid[i]).join(""); }
+  function showMsg(text, cls, ms){
+    const el = $("#current"); if (!el) return; clearTimeout(msgTimer);
+    el.className = "current msg " + (cls || ""); el.textContent = text; void el.offsetWidth;
+    if (ms) msgTimer = setTimeout(() => { el.textContent = ""; el.className = "current"; }, ms);
+  }
+
+  function useHint(){
+    if (hintsAvailable() <= 0 || isDone()) return;
+    const order = [...prep.words, prep.spangram];
+    const w = order.find(x => !prog.found.includes(x)); if (!w) return;
+    prog.hintWord = w; prog.hintsUsed++; save(); paint(); showMsg("Find the outlined word 💡", "", 1800);
+  }
+
+  const cheers = ["Nice!", "Yum!", "Great find!", "♥ Yes! ♥", "Ooh, good one!", "You're on fire!"];
+  function submit(){
+    const cells = sel.slice(); sel = []; if (!cells.length){ paint(); return; }
+    const res = judgeSelection(prep, cells, new Set(prog.found));
+    if (res.type === "theme" || res.type === "spangram"){
+      prog.found.push(res.word); if (prog.hintWord === res.word) prog.hintWord = null; save(); paint();
+      cells.forEach((c, k) => { const el = $(`#board .cell[data-i="${c}"]`); setTimeout(() => { el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }, k * 45); });
+      if (res.type === "spangram") { showMsg("SPANGRAM! 💛", "span", 1600); floatHearts(6); }
+      else showMsg(cheers[Math.floor(Math.random() * cheers.length)], "good", 1300);
+      if (isDone()) setTimeout(() => showWin(true), 900);
+      return;
+    }
+    paint();
+    if (res.type === "short") { if (cells.length > 1) showMsg("Too short", "bad", 1100); else showMsg("", ""); return; }
+    if (res.type === "already") return showMsg("Already found", "bad", 1100);
+    if (res.type === "wrongspot") return showMsg("Right word, different path! 🤔", "bad", 1700);
+    if (prog.guesses.includes(res.word)) return showMsg("Already tried", "bad", 1100);
+    prog.guesses.push(res.word); save(); paint();
+    const left = SETTINGS.guessesPerHint - prog.guesses.length % SETTINGS.guessesPerHint;
+    if (left === SETTINGS.guessesPerHint) showMsg("Hint earned! 💡", "good", 1400);
+    else showMsg(`Not a theme word`, "bad", 1100);
+  }
+
+  // ---- pointer input: drag (mouse/touch) or tap-tap-tap then tap last letter again ----
+  function bindBoard(wrap){
+    let dragging = false, moved = false, tapSubmit = false, pid = null;
+    const owned = () => cellOwner();
+    function cellAt(x, y, strict){
+      const r = wrap.getBoundingClientRect(), cw = r.width / prep.cols, ch = r.height / prep.rows;
+      const c = Math.floor((x - r.left) / cw), rr = Math.floor((y - r.top) / ch);
+      if (c < 0 || c >= prep.cols || rr < 0 || rr >= prep.rows) return -1;
+      if (strict){ const dx = x - (r.left + (c + .5) * cw), dy = y - (r.top + (rr + .5) * ch); if (Math.hypot(dx / cw, dy / ch) > 0.42) return -1; }
+      return rr * prep.cols + c;
+    }
+    wrap.addEventListener("pointerdown", e => {
+      if (isDone()) return;
+      const i = cellAt(e.clientX, e.clientY, false); if (i < 0 || owned()[i]) return;
+      e.preventDefault(); pid = e.pointerId; try { wrap.setPointerCapture(pid); } catch(_){}
+      dragging = true; moved = false; tapSubmit = false;
+      const last = sel[sel.length - 1];
+      if (sel.length && i === last) tapSubmit = true;
+      else if (sel.includes(i)) sel = sel.slice(0, sel.indexOf(i) + 1);
+      else if (sel.length && areAdjacent(last, i, prep.cols)) sel.push(i);
+      else sel = [i];
+      paint();
+    });
+    wrap.addEventListener("pointermove", e => {
+      if (!dragging || e.pointerId !== pid) return;
+      const i = cellAt(e.clientX, e.clientY, true); if (i < 0) return;
+      const last = sel[sel.length - 1]; if (i === last) return;
+      if (sel.length >= 2 && i === sel[sel.length - 2]){ sel.pop(); moved = true; paint(); return; }
+      if (!sel.includes(i) && !owned()[i] && areAdjacent(last, i, prep.cols)){ sel.push(i); moved = true; paint(); }
+    });
+    const end = e => {
+      if (!dragging || e.pointerId !== pid) return; dragging = false;
+      if ((moved && sel.length > 1) || tapSubmit) submit();
+    };
+    wrap.addEventListener("pointerup", end); wrap.addEventListener("pointercancel", end);
+  }
+
+  function floatHearts(n){ const icons = ["💛", "💙", "♥️", "💛", "🩵"]; for (let k = 0; k < n; k++){ const h = document.createElement("div"); h.className = "floatheart";
+    h.textContent = icons[k % icons.length]; h.style.left = (5 + Math.random() * 90) + "vw"; h.style.animationDelay = (Math.random() * .8) + "s";
+    h.style.fontSize = (18 + Math.random() * 20) + "px"; document.body.appendChild(h); setTimeout(() => h.remove(), 4200); } }
+
+  function showWin(fresh){
+    const P = PUZZLES[cur];
+    $("#winTitle").textContent = fresh ? "You did it, Melina!" : "Solved! 💫";
+    $("#winMsg").textContent = P.winMessage || "I love you!";
+    $("#winSig").textContent = "— love, " + SETTINGS.fromName + " ♥";
+    $("#winChips").innerHTML = "";
+    [prep.spangram, ...prep.words].forEach(w => { const s = document.createElement("span"); s.className = "chip" + (w === prep.spangram ? " spang" : ""); s.textContent = w; $("#winChips").appendChild(s); });
+    $("#winNext").textContent = nextUnsolved() === -1 ? "Play again ↺" : "Next puzzle →";
+    $("#winOv").classList.add("show"); if (fresh) floatHearts(18);
+  }
+  function nextUnsolved(){ for (let k = 1; k <= PUZZLES.length; k++){ const i = (cur + k) % PUZZLES.length; if (i === cur) continue; const p = prepared[i];
+    if (p.ok && store.get(keyFor(i), { found: [] }).found.length < p.words.length + 1) return i; } return -1; }
+
+  function openPicker(){
+    const ul = $("#plist"); ul.innerHTML = "";
+    PUZZLES.forEach((P, i) => { const p = prepared[i], li = document.createElement("li"), b = document.createElement("button");
+      const f = p.ok ? store.get(keyFor(i), { found: [] }).found.length : 0, done = p.ok && f >= p.words.length + 1;
+      b.className = (i === cur ? "cur " : "") + (done ? "done" : "");
+      b.innerHTML = `<span></span><span class="st">${!p.ok ? "⚠️ needs fixing" : done ? "✓ Solved" : f ? `${f} / ${p.words.length + 1}` : "New ♥"}</span>`;
+      b.firstChild.textContent = `${i + 1}. ${P.title || P.theme}`;
+      b.onclick = () => { cur = i; store.set("current", cur); closeAll(); render(); };
+      li.appendChild(b); ul.appendChild(li); });
+    $("#pickerOv").classList.add("show");
+  }
+  function closeAll(){ document.querySelectorAll(".overlay").forEach(o => o.classList.remove("show")); }
+  document.querySelectorAll(".overlay").forEach(o => o.addEventListener("click", e => { if (e.target === o || e.target.hasAttribute("data-close")) closeAll(); }));
+  $("#menuBtn").onclick = openPicker; $("#helpBtn").onclick = () => $("#helpOv").classList.add("show");
+  $("#resetBtn").onclick = () => { if (!confirm("Restart this puzzle? Found words will be cleared.")) return; store.set(keyFor(cur), { found: [], guesses: [], hintsUsed: 0, hintWord: null }); closeAll(); render(); };
+  $("#winPick").onclick = () => { closeAll(); openPicker(); };
+  $("#winNext").onclick = () => { const n = nextUnsolved(); closeAll();
+    if (n === -1){ store.set(keyFor(cur), { found: [], guesses: [], hintsUsed: 0, hintWord: null }); } else cur = n; store.set("current", cur); render(); };
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeAll(); });
+  window.__strands = { prepared, get cur(){ return cur; } };
+  render();
+  if (!store.get("seenHelp", false)) { store.set("seenHelp", true); $("#helpOv").classList.add("show"); }
+})();
+</script>
+</body>
+</html>
