@@ -10,33 +10,56 @@
 /* ======================================================================
    ✏️  EDIT YOUR PUZZLES HERE  ✏️
    ----------------------------------------------------------------------
+   ONE puzzle is shown at a time. It changes automatically every Monday
+   at 12:00 AM Pacific time (San Luis Obispo time).
+
+   THE SCHEDULE = THE ORDER OF THE PUZZLES LIST BELOW, TOP TO BOTTOM.
+     • Week 0 (starting SETTINGS.startDate) shows the 1st puzzle,
+       week 1 the 2nd puzzle, and so on.
+     • When the list runs out it starts again from the top.
+     • To reorder: cut a whole { ... }, block and paste it somewhere else.
+     • To add: copy a whole { ... }, block, paste it, edit it.
+     • To remove: delete its whole { ... }, block.
+
    Each puzzle needs:
-     theme      – the hint shown at the top of the board
-     spangram   – the special word that stretches edge-to-edge (turns yellow)
+     title      – short name (shows on the win screen)
+     theme      – the hint shown above the board
+     spangram   – the special edge-to-edge word (turns yellow)
      words      – the other hidden words (turn light blue)
-     winMessage – the note Melina sees when she finishes (use \n for a new line)
+     winMessage – the note she sees when she finishes (\n = new line)
    Optional:
-     title      – short name shown in the puzzle list (defaults to the theme)
      seed       – any number; change it to get a different letter layout
-     rows/cols  – grid size for just this puzzle (defaults to SETTINGS below)
 
-   THE ONE RULE: all letters (spangram + words) must add up to exactly
-   rows × cols  (8 × 6 = 48). Spaces, apostrophes and dashes are ignored,
-   so "Coke Zero" counts as 8 letters. If the count is off, the game shows
-   a friendly message telling you how many letters to add or remove.
+   THE ONE RULE: spangram + words must add up to exactly
+   rows × cols = 8 × 6 = 48 letters. Spaces, apostrophes and dashes are
+   ignored ("Coke Zero" = 8 letters). If it's off, the game tells you how
+   many letters to add or remove.
 
-   The letter grid is built automatically from these words – just save
-   the file and refresh the page.
+   PREVIEW any puzzle (just for you – add to the end of the link):
+     ?week=5      → what week 5 will show
+     ?puzzle=12   → the 12th puzzle in the list below
+     ?date=2027-02-14 → what will show on that date
    ====================================================================== */
 const SETTINGS = {
-  rows: 8,               // grid height
-  cols: 6,               // grid width
-  guessesPerHint: 3,     // wrong 4+ letter guesses needed to earn a hint
-  freeHints: 1,          // hints available at the start of every puzzle
-  fromName: "Finn",      // signature on the win screen
+  startDate: "2026-11-30",          // a MONDAY: week 0 begins here (Pacific time)
+  timeZone: "America/Los_Angeles",  // when "Monday" starts
+  rows: 8,                          // grid height
+  cols: 6,                          // grid width
+  guessesPerHint: 3,                // wrong 4+ letter guesses needed to earn a hint
+  freeHints: 1,                     // hints available at the start of every puzzle
+  fromName: "Finn",                 // signature on the win screen
+  allowPreviewLinks: true,          // lets ?week= / ?puzzle= / ?date= work
 };
 
 const PUZZLES = [
+  {
+    title: "Where it all began",
+    theme: "Where it all began",
+    spangram: "Pantheon",
+    words: ["Rome", "Gelato", "Colosseum", "Trevi", "Pasta", "Vespa", "Piazza"],
+    seed: 1,
+    winMessage: "Of all the people at the Pantheon that day, I got lucky and met you.\nBest thing Rome ever gave me (sorry, gelato). ♥",
+  },
   {
     title: "Things I love about you",
     theme: "Things I love about you",
@@ -52,11 +75,11 @@ const PUZZLES = [
     winMessage: "Sweetest girl, sweetest tooth.\nLava cake with vanilla ice cream is on me this week. 🍫",
   },
   {
-    title: "Sip sip hooray",
-    theme: "Sip sip hooray!",
-    spangram: "Sip sip hooray",
-    words: ["Root beer", "Celsius", "Thai tea", "Latte", "Jager bomb"],
-    winMessage: "Cheers to you! 🥂\nNext round of lavender vanilla lattes (or Jäger bombs…) is on me.",
+    title: "Bootless in the Vatican",
+    theme: "Holy soles",
+    spangram: "Bootless",
+    words: ["Vatican", "Sistine", "Chapel", "Sandals", "Barefoot", "Socks"],
+    winMessage: "Smallest country in the world, biggest footwear crisis of our relationship. 👢\nStill the cutest person in Vatican City.",
   },
   {
     title: "Dinner date",
@@ -73,11 +96,158 @@ const PUZZLES = [
     winMessage: "Double double, protein style, onions, 2 extra sauces, normal fries,\nand a drink that is \"2/3 Diet Coke, 1/3 Coke\" but actually 100% Coke Zero.\nI'd memorize it a hundred times over. 🍔",
   },
   {
+    title: "Malta",
+    theme: "Sun, sea & pastizzi",
+    spangram: "Island hopping",
+    words: ["Valletta", "Gozo", "Comino", "Pastizzi", "Ferry", "Swim"],
+    winMessage: "Malta was gorgeous, but the view I kept looking at was you. 🌊",
+  },
+  {
+    title: "Sip sip hooray",
+    theme: "Sip sip hooray!",
+    spangram: "Sip sip hooray",
+    words: ["Root beer", "Celsius", "Thai tea", "Latte", "Jager bomb"],
+    winMessage: "Cheers to you! 🥂\nNext round of lavender vanilla lattes (or Jäger bombs…) is on me.",
+  },
+  {
+    title: "What I call you",
+    theme: "What I call you",
+    spangram: "Pet names",
+    words: ["Babe", "Sweetie", "Angel", "Princess", "Sunshine", "Honeybun"],
+    winMessage: "Babe, angel, sunshine… mostly just \"mine.\" 💛",
+  },
+  {
+    title: "Postcards from Prague",
+    theme: "Postcards from Prague",
+    spangram: "Czech mate",
+    words: ["Charles", "Bridge", "Castle", "Trdelnik", "Pilsner", "Clock"],
+    winMessage: "You're my Czech mate. That's it, that's the message. 🏰",
+  },
+  {
+    title: "Love you to pieces",
+    theme: "Love you to pieces",
+    spangram: "Sweetheart",
+    words: ["Kisses", "Cuddles", "Forever", "Soulmate", "Hugs", "Smooch"],
+    winMessage: "Happy Valentine's week, sweetheart.\nAll the hugs, kisses and cuddles are yours. Forever. 💌",
+  },
+  {
+    title: "Never again: Duplex",
+    theme: "Never again (Duplex edition)",
+    spangram: "Never again",
+    words: ["Duplex", "Headache", "Water", "Advil", "Hero", "Blurry", "Safe"],
+    winMessage: "Worst night, best recovery crew.\nI'll always get you home safe. 💙",
+  },
+  {
+    title: "Date night",
+    theme: "Get dressed, we're going out",
+    spangram: "Date night",
+    words: ["Movie", "Candles", "Dessert", "Dress up", "Hold hands", "Wine"],
+    winMessage: "Consider this your official invitation: date night, this week, you pick. 🕯️",
+  },
+  {
+    title: "Buda + Pest",
+    theme: "Two cities, one Danube",
+    spangram: "Thermal baths",
+    words: ["Danube", "Goulash", "Paprika", "Ruin bar", "Szechenyi"],
+    winMessage: "Hot baths, ruin bars and goulash. Every city is better with you in it. ♨️",
+  },
+  {
+    title: "Spice girl",
+    theme: "Spice girl",
+    spangram: "Butter chicken",
+    words: ["Pineapple", "Curry", "Naan", "Masala", "Tikka", "Garlic"],
+    winMessage: "You're the spice of my life (and I'm the extra naan). 🍛",
+  },
+  {
+    title: "That hostel",
+    theme: "That hostel… 😳",
+    spangram: "Thin walls",
+    words: ["Bunkbed", "Earplugs", "Locker", "Awkward", "Yikes", "Noises"],
+    winMessage: "We survived it. We will never speak of it. (We will absolutely speak of it.) 🙈",
+  },
+  {
     title: "Juicy",
     theme: "Watermelon on top",
     spangram: "Fruit bowl",
     words: ["Watermelon", "Nectarine", "Pineapple", "Cherry", "Mango"],
     winMessage: "Whatever's in season, I'm picking you. 🍉",
+  },
+  {
+    title: "Panama",
+    theme: "A man, a plan, a canal…",
+    spangram: "Panama Canal",
+    words: ["Locks", "Ceviche", "Sloths", "Beach", "Plantain", "Toucan"],
+    winMessage: "A man, a plan, a canal: Panama.\nA man, a plan, a girlfriend: perfect. 🦥",
+  },
+  {
+    title: "À la mode",
+    theme: "Everything's better with a scoop",
+    spangram: "Vanilla ice cream",
+    words: ["Lava cake", "Apple pie", "Brownie", "Scoop", "Fudge"],
+    winMessage: "You + me + a warm brownie with vanilla ice cream = perfect night. 🍨",
+  },
+  {
+    title: "When in Rome",
+    theme: "When in Rome…",
+    spangram: "When in Rome",
+    words: ["Carbonara", "Forum", "Tiber", "Espresso", "Amore", "Spritz"],
+    winMessage: "Ti amo, Melina. Let's go back someday and do it all again. 🇮🇹",
+  },
+  {
+    title: "Slice slice baby",
+    theme: "Slice slice baby",
+    spangram: "Woodstocks",
+    words: ["BBQ chicken", "Pepperoni", "Veggies", "Garlic", "Cheesy"],
+    winMessage: "You have a pizza my heart. Woodstock's BBQ chicken this week? 🍕",
+  },
+  {
+    title: "Thirsty girl",
+    theme: "Thirsty girl",
+    spangram: "Moscow mule",
+    words: ["Lavender", "Latte", "Rose boba", "Milk", "Green tea", "Peach"],
+    winMessage: "I'll be your designated drink-fetcher forever. 🧋",
+  },
+  {
+    title: "Our SLO favorites",
+    theme: "Around town",
+    spangram: "SLO favorites",
+    words: ["Nates on Marsh", "Cobalt Blue", "Giuseppes", "Taste"],
+    winMessage: "Every dinner in SLO is better across the table from you. 🌅",
+  },
+  {
+    title: "Her colors",
+    theme: "Light blue & yellow",
+    spangram: "Yellow tulips",
+    words: ["Bouquet", "Light blue", "Sunshine", "Petals", "Canary"],
+    winMessage: "Yellow tulips are coming your way. You're my sunshine. 🌷",
+  },
+  {
+    title: "Sugar rush",
+    theme: "Sugar rush",
+    spangram: "Baby Bottle Pop",
+    words: ["Cherry", "Jello", "Licorice", "Gummies", "Lifesaver"],
+    winMessage: "My little candy goblin. I love you to the bottom of the Baby Bottle Pop. 🍭",
+  },
+  {
+    title: "The perfect iced tea",
+    theme: "Unsweetened… then sweetened",
+    spangram: "Pink packet",
+    words: ["Iced tea", "Sweet N Low", "Unsweetened", "Lemon", "Straws"],
+    winMessage: "Unsweetened tea, one pink packet, and the sweetest girl. 🩷",
+  },
+  {
+    title: "Oodles of noodles",
+    theme: "Oodles of noodles",
+    spangram: "Creamy Alfredo",
+    words: ["Bowtie", "Rotini", "Cavatappi", "Parmesan", "Garlic"],
+    winMessage: "I love you more than you love cavatappi (that's a lot). 🍝",
+  },
+  {
+    title: "Lunch break",
+    theme: "Lunch break",
+    spangram: "Spicy Italian",
+    words: ["Subway", "Smash burger", "Pickles", "Salami", "Tomato"],
+    winMessage: "Spicy Italian or smash burgers, I'm always down for lunch with you. 🥪",
   },
 ];
 /* ======================================================================
@@ -141,12 +311,6 @@ const PUZZLES = [
   .modal{background:#fff; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.18); width:100%; max-width:400px; max-height:88dvh; overflow:auto; padding:22px 20px; position:relative}
   .modal h2{font-family:Georgia,serif; margin:0 0 12px; font-size:24px}
   .close{position:absolute; top:10px; right:10px}
-  .plist{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px}
-  .plist button{width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 14px; border-radius:10px; border:1px solid var(--line); background:#fff; font-size:16px; cursor:pointer}
-  .plist button:hover{background:#fafafa}
-  .plist button.cur{border-color:var(--ink); border-width:2px}
-  .plist .st{font-size:13px; color:var(--muted); white-space:nowrap}
-  .plist .done .st{color:#1a7fa3; font-weight:700}
   .row{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap}
   .btn{flex:1; border-radius:999px; padding:12px 16px; font-size:16px; font-weight:700; cursor:pointer; border:1.5px solid var(--ink); background:#fff}
   .btn.primary{background:var(--ink); color:#fff}
@@ -162,22 +326,18 @@ const PUZZLES = [
   .floatheart{position:fixed; bottom:-30px; font-size:24px; pointer-events:none; z-index:30; animation:floatup 3s ease-in forwards}
   @keyframes floatup{to{transform:translateY(-110dvh) rotate(25deg); opacity:0}}
   @media (min-width:700px){ .cell span{font-size:28px} main{padding-top:20px} }
-</style>
-</head>
+  .sub{font-size:12.5px; color:var(--muted); margin-top:-4px; text-align:center}
+  .win .next{margin-top:14px; font-size:14px; color:var(--muted)}
+  .win .next b{color:var(--ink); font-variant-numeric:tabular-nums}
+  .preview{background:#fff7d6; border:1px solid #f1df8a; border-radius:8px; font-size:12px; padding:4px 10px}
+</style></head>
 <body>
 <header>
-  <button class="iconbtn" id="menuBtn" aria-label="Choose puzzle">☰</button>
+  <span style="width:40px"></span>
   <h1>Melina Strands <span class="h">♥</span></h1>
   <button class="iconbtn" id="helpBtn" aria-label="How to play">?</button>
 </header>
 <main id="main"></main>
-
-<div class="overlay" id="pickerOv"><div class="modal">
-  <button class="iconbtn close" data-close>✕</button>
-  <h2>Puzzles</h2>
-  <ul class="plist" id="plist"></ul>
-  <div class="row"><button class="btn small" id="resetBtn">Restart this puzzle</button></div>
-</div></div>
 
 <div class="overlay" id="helpOv"><div class="modal help">
   <button class="iconbtn close" data-close>✕</button>
@@ -185,6 +345,8 @@ const PUZZLES = [
   <p>Find the hidden words that fit the theme. Drag (or tap letter by letter, then tap the last letter again) to connect letters — up, down, sideways or diagonally.</p>
   <p><b style="background:var(--blue);padding:1px 6px;border-radius:5px">Blue</b> = theme word. <b style="background:var(--yellow);padding:1px 6px;border-radius:5px">Yellow</b> = the <b>spangram</b>, which describes the theme and touches two opposite sides of the board.</p>
   <p>Every letter is used exactly once. Stuck? Every 3 wrong guesses of 4+ letters earns a hint ♥</p>
+  <p>A brand-new puzzle appears every <b>Monday</b>.</p>
+  <div class="row"><button class="btn small" id="resetBtn">Restart this puzzle</button></div>
 </div></div>
 
 <div class="overlay" id="winOv"><div class="modal win">
@@ -194,7 +356,8 @@ const PUZZLES = [
   <div class="msg" id="winMsg"></div>
   <div class="sig" id="winSig"></div>
   <div class="chips" id="winChips"></div>
-  <div class="row"><button class="btn" id="winPick">All puzzles</button><button class="btn primary" id="winNext">Next puzzle →</button></div>
+  <div class="next" id="winNext"></div>
+  <div class="row"><button class="btn primary" data-close>Admire the board 💛</button></div>
 </div></div>
 
 <script>
@@ -321,35 +484,68 @@ function judgeSelection(prep, cells, foundSet){
   }
   return { type: "guess", word };
 }
-// === GENERATOR END ===
 
+// ---- weekly schedule (pure, testable) ----
+function zonedParts(date, timeZone){
+  const f = new Intl.DateTimeFormat("en-US", { timeZone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
+  const o = {}; for (const p of f.formatToParts(date)) o[p.type] = p.value;
+  return { y: +o.year, m: +o.month, d: +o.day, h: +o.hour % 24, mi: +o.minute, s: +o.second };
+}
+function dayNum(ymd){ const [y, m, d] = String(ymd).split("-").map(Number); return Math.round(Date.UTC(y, m - 1, d) / 86400000); }
+function ymdFromDayNum(n){ return new Date(n * 86400000).toISOString().slice(0, 10); }
+// Which week is it (in settings.timeZone)? Week 0 starts at settings.startDate 00:00.
+function weekInfo(now, settings){
+  const p = zonedParts(now, settings.timeZone || "America/Los_Angeles");
+  const today = Math.round(Date.UTC(p.y, p.m - 1, p.d) / 86400000), start = dayNum(settings.startDate);
+  const raw = Math.floor((today - start) / 7), week = Math.max(0, raw);
+  const nextChangeDay = start + 7 * (week + 1);
+  const msToNext = (nextChangeDay - today) * 86400000 - ((p.h * 60 + p.mi) * 60 + p.s) * 1000;
+  return { week, beforeStart: raw < 0, today: ymdFromDayNum(today), mondayOfWeek: ymdFromDayNum(start + 7 * week), nextChange: ymdFromDayNum(nextChangeDay), msToNext };
+}
+function puzzleIndexForWeek(week, count){ return count ? ((Math.max(0, week) % count) + count) % count : 0; }
+// === GENERATOR END ===
 if (typeof window !== "undefined") (function(){
   const $ = s => document.querySelector(s);
-  const prepared = PUZZLES.map(p => preparePuzzle(p, SETTINGS));
   const LS = "melinaStrands.";
   const store = { get(k, d){ try { const v = localStorage.getItem(LS + k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
                   set(k, v){ try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch(e){} } };
-  const keyFor = i => { const p = prepared[i]; return "p." + hashStr(JSON.stringify([PUZZLES[i].theme, p.spangram, p.words, p.rows, p.cols, PUZZLES[i].seed || 0])); };
-  const loadProg = i => store.get(keyFor(i), { found: [], guesses: [], hintsUsed: 0, hintWord: null });
-  let cur = Math.min(store.get("current", 0), PUZZLES.length - 1); if (cur < 0) cur = 0;
-  let prog, prep, sel = [], msgTimer = null;
 
-  function save(){ store.set(keyFor(cur), prog); store.set("current", cur); }
+  // ---- which puzzle is showing? ----
+  const params = new URLSearchParams(location.search);
+  let info = weekInfo(new Date(), SETTINGS), preview = "";
+  let week = info.week, cur;
+  if (SETTINGS.allowPreviewLinks){
+    if (params.has("date") && /^\d{4}-\d{2}-\d{2}$/.test(params.get("date"))){
+      const d = params.get("date"); info = weekInfo(new Date(d + "T12:00:00Z"), SETTINGS); week = info.week; preview = `Preview: ${d}`;
+    }
+    if (params.has("week") && /^\d+$/.test(params.get("week"))){ week = +params.get("week"); preview = `Preview: week ${week}`; }
+  }
+  cur = puzzleIndexForWeek(week, PUZZLES.length);
+  if (SETTINGS.allowPreviewLinks && params.has("puzzle") && /^\d+$/.test(params.get("puzzle"))){
+    cur = Math.min(Math.max(1, +params.get("puzzle")), PUZZLES.length) - 1; preview = `Preview: puzzle ${cur + 1} of ${PUZZLES.length} in the list`;
+  }
+  const P = PUZZLES[cur] || {};
+  const prep = preparePuzzle(P, SETTINGS);
+  const progKey = "p." + hashStr(JSON.stringify([P.theme, prep.spangram, prep.words, prep.rows, prep.cols, P.seed || 0])) + (preview && params.has("puzzle") ? ".preview" : ".w" + week);
+  let prog = store.get(progKey, { found: [], guesses: [], hintsUsed: 0, hintWord: null });
+  let sel = [], msgTimer = null, countdownTimer = null;
+
+  function save(){ store.set(progKey, prog); }
   function hintsAvailable(){ return SETTINGS.freeHints + Math.floor(prog.guesses.length / SETTINGS.guessesPerHint) - prog.hintsUsed; }
   function totalWords(){ return prep.words.length + 1; }
 
   function render(){
-    prep = prepared[cur]; prog = loadProg(cur); sel = [];
+    sel = [];
     const m = $("#main"); m.innerHTML = "";
-    const P = PUZZLES[cur];
+    if (preview){ const pv = document.createElement("div"); pv.className = "preview"; pv.textContent = "👀 " + preview + " (only you see this link)"; m.appendChild(pv); }
     const theme = document.createElement("div"); theme.className = "theme";
-    theme.innerHTML = `<div class="lbl">Today's theme</div><div class="txt"></div>`;
+    theme.innerHTML = `<div class="lbl">This week's theme</div><div class="txt"></div>`;
     theme.querySelector(".txt").textContent = P.theme || "(no theme)";
     m.appendChild(theme);
-    const nm = document.createElement("div"); nm.className = "puzname"; nm.textContent = `Puzzle ${cur + 1} of ${PUZZLES.length}`; m.appendChild(nm);
+    const nm = document.createElement("div"); nm.className = "sub"; nm.textContent = `Puzzle #${week + 1} · new puzzle every Monday`; m.appendChild(nm);
     if (!prep.ok){
       const e = document.createElement("div"); e.className = "error";
-      e.innerHTML = `<h3>Oops — this puzzle needs a tweak 🛠️</h3><ul>${prep.errors.map(x => `<li>${x}</li>`).join("")}</ul>` +
+      e.innerHTML = `<h3>Oops — this puzzle needs a tweak 🛠️</h3><div style="font-size:13px;color:#555">Puzzle ${cur + 1} in the list: "${(P.title || P.theme || "").replace(/</g, "&lt;")}"</div><ul>${prep.errors.map(x => `<li>${x}</li>`).join("")}</ul>` +
         (prep.spangram || prep.words.length ? `<div style="font-size:13px;color:#555">Letter counts: ${[prep.spangram, ...prep.words].filter(Boolean).map(w => `${w} (${w.length})`).join(", ")}</div>` : "") +
         `<div style="margin-top:10px;font-size:13px;color:#555">Edit the <code>PUZZLES</code> list at the top of <code>index.html</code>, save, and refresh.</div>`;
       m.appendChild(e);
@@ -369,25 +565,25 @@ if (typeof window !== "undefined") (function(){
     $("#hintBtn").onclick = useHint;
     bindBoard(wrap);
     paint(); showMsg("", "");
-    if (isDone()) setTimeout(() => showWin(false), 250);
+    if (isDone()) showMsg("Solved! New puzzle Monday 💛", "good");
   }
 
   function isDone(){ return prep.ok && prog.found.length >= totalWords(); }
-  function cellOwner(){ const own = {}; for (const w of prog.found) for (const c of prep.paths[w]) own[c] = w; return own; }
+  function cellOwner(){ const own = {}; for (const w of prog.found) if (prep.paths[w]) for (const c of prep.paths[w]) own[c] = w; return own; }
 
   function paint(){
     const own = cellOwner(), board = $("#board"); if (!board) return;
-    const hintCells = new Set(prog.hintWord && !prog.found.includes(prog.hintWord) ? prep.paths[prog.hintWord] : []);
+    const hintCells = new Set(prog.hintWord && prep.paths[prog.hintWord] && !prog.found.includes(prog.hintWord) ? prep.paths[prog.hintWord] : []);
     board.querySelectorAll(".cell").forEach(el => { const i = +el.dataset.i, w = own[i];
       el.classList.toggle("found", !!w && w !== prep.spangram); el.classList.toggle("spang", w === prep.spangram);
       el.classList.toggle("sel", sel.includes(i)); el.classList.toggle("hint", hintCells.has(i)); });
     const svg = board.querySelector("svg"); let html = "";
     const pt = i => `${(i % prep.cols) + 0.5},${Math.floor(i / prep.cols) + 0.5}`;
     const poly = (cells, color) => cells.length > 1 ? `<polyline points="${cells.map(pt).join(" ")}" fill="none" stroke="${color}" stroke-width="0.17" stroke-linecap="round" stroke-linejoin="round"/>` : "";
-    for (const w of prog.found) html += poly(prep.paths[w], w === prep.spangram ? "#f8cd05" : "#aedfee");
+    for (const w of prog.found) if (prep.paths[w]) html += poly(prep.paths[w], w === prep.spangram ? "#f8cd05" : "#aedfee");
     html += poly(sel, "#dbd8c5");
     svg.innerHTML = html;
-    const c = $("#count"); c.innerHTML = `<b>${prog.found.filter(w => w !== prep.spangram).length + (prog.found.includes(prep.spangram) ? 1 : 0)}</b> of <b>${totalWords()}</b> theme words found.`;
+    $("#count").innerHTML = `<b>${prog.found.length}</b> of <b>${totalWords()}</b> theme words found.`;
     const hb = $("#hintBtn"), avail = hintsAvailable(), active = prog.hintWord && !prog.found.includes(prog.hintWord);
     hb.classList.toggle("ready", avail > 0 && !active && !isDone());
     hb.disabled = isDone() || active || avail <= 0;
@@ -400,13 +596,12 @@ if (typeof window !== "undefined") (function(){
   function showMsg(text, cls, ms){
     const el = $("#current"); if (!el) return; clearTimeout(msgTimer);
     el.className = "current msg " + (cls || ""); el.textContent = text; void el.offsetWidth;
-    if (ms) msgTimer = setTimeout(() => { el.textContent = ""; el.className = "current"; }, ms);
+    if (ms) msgTimer = setTimeout(() => { el.textContent = isDone() ? "Solved! New puzzle Monday 💛" : ""; el.className = "current msg" + (isDone() ? " good" : ""); }, ms);
   }
 
   function useHint(){
     if (hintsAvailable() <= 0 || isDone()) return;
-    const order = [...prep.words, prep.spangram];
-    const w = order.find(x => !prog.found.includes(x)); if (!w) return;
+    const w = [...prep.words, prep.spangram].find(x => !prog.found.includes(x)); if (!w) return;
     prog.hintWord = w; prog.hintsUsed++; save(); paint(); showMsg("Find the outlined word 💡", "", 1800);
   }
 
@@ -430,13 +625,12 @@ if (typeof window !== "undefined") (function(){
     prog.guesses.push(res.word); save(); paint();
     const left = SETTINGS.guessesPerHint - prog.guesses.length % SETTINGS.guessesPerHint;
     if (left === SETTINGS.guessesPerHint) showMsg("Hint earned! 💡", "good", 1400);
-    else showMsg(`Not a theme word`, "bad", 1100);
+    else showMsg("Not a theme word", "bad", 1100);
   }
 
   // ---- pointer input: drag (mouse/touch) or tap-tap-tap then tap last letter again ----
   function bindBoard(wrap){
     let dragging = false, moved = false, tapSubmit = false, pid = null;
-    const owned = () => cellOwner();
     function cellAt(x, y, strict){
       const r = wrap.getBoundingClientRect(), cw = r.width / prep.cols, ch = r.height / prep.rows;
       const c = Math.floor((x - r.left) / cw), rr = Math.floor((y - r.top) / ch);
@@ -446,7 +640,7 @@ if (typeof window !== "undefined") (function(){
     }
     wrap.addEventListener("pointerdown", e => {
       if (isDone()) return;
-      const i = cellAt(e.clientX, e.clientY, false); if (i < 0 || owned()[i]) return;
+      const i = cellAt(e.clientX, e.clientY, false); if (i < 0 || cellOwner()[i]) return;
       e.preventDefault(); pid = e.pointerId; try { wrap.setPointerCapture(pid); } catch(_){}
       dragging = true; moved = false; tapSubmit = false;
       const last = sel[sel.length - 1];
@@ -461,7 +655,7 @@ if (typeof window !== "undefined") (function(){
       const i = cellAt(e.clientX, e.clientY, true); if (i < 0) return;
       const last = sel[sel.length - 1]; if (i === last) return;
       if (sel.length >= 2 && i === sel[sel.length - 2]){ sel.pop(); moved = true; paint(); return; }
-      if (!sel.includes(i) && !owned()[i] && areAdjacent(last, i, prep.cols)){ sel.push(i); moved = true; paint(); }
+      if (!sel.includes(i) && !cellOwner()[i] && areAdjacent(last, i, prep.cols)){ sel.push(i); moved = true; paint(); }
     });
     const end = e => {
       if (!dragging || e.pointerId !== pid) return; dragging = false;
@@ -474,41 +668,38 @@ if (typeof window !== "undefined") (function(){
     h.textContent = icons[k % icons.length]; h.style.left = (5 + Math.random() * 90) + "vw"; h.style.animationDelay = (Math.random() * .8) + "s";
     h.style.fontSize = (18 + Math.random() * 20) + "px"; document.body.appendChild(h); setTimeout(() => h.remove(), 4200); } }
 
+  function fmtCountdown(ms){
+    if (ms <= 0) return "any second now — refresh! 🎉";
+    const s = Math.floor(ms / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
+    return (d ? `${d}d ` : "") + `${h}h ${String(m).padStart(2, "0")}m ${String(ss).padStart(2, "0")}s`;
+  }
+  function tickCountdown(){
+    const el = $("#winNext"); if (!el) return;
+    if (preview){ el.innerHTML = `Puzzle #${week + 1} · new puzzle every Monday`; return; }
+    const ms = weekInfo(new Date(), SETTINGS).msToNext;
+    el.innerHTML = `Puzzle #${week + 1} · new puzzle every Monday<br>Next puzzle in <b>${fmtCountdown(ms)}</b>`;
+  }
   function showWin(fresh){
-    const P = PUZZLES[cur];
     $("#winTitle").textContent = fresh ? "You did it, Melina!" : "Solved! 💫";
     $("#winMsg").textContent = P.winMessage || "I love you!";
     $("#winSig").textContent = "— love, " + SETTINGS.fromName + " ♥";
     $("#winChips").innerHTML = "";
     [prep.spangram, ...prep.words].forEach(w => { const s = document.createElement("span"); s.className = "chip" + (w === prep.spangram ? " spang" : ""); s.textContent = w; $("#winChips").appendChild(s); });
-    $("#winNext").textContent = nextUnsolved() === -1 ? "Play again ↺" : "Next puzzle →";
+    tickCountdown(); clearInterval(countdownTimer); countdownTimer = setInterval(tickCountdown, 1000);
     $("#winOv").classList.add("show"); if (fresh) floatHearts(18);
   }
-  function nextUnsolved(){ for (let k = 1; k <= PUZZLES.length; k++){ const i = (cur + k) % PUZZLES.length; if (i === cur) continue; const p = prepared[i];
-    if (p.ok && store.get(keyFor(i), { found: [] }).found.length < p.words.length + 1) return i; } return -1; }
 
-  function openPicker(){
-    const ul = $("#plist"); ul.innerHTML = "";
-    PUZZLES.forEach((P, i) => { const p = prepared[i], li = document.createElement("li"), b = document.createElement("button");
-      const f = p.ok ? store.get(keyFor(i), { found: [] }).found.length : 0, done = p.ok && f >= p.words.length + 1;
-      b.className = (i === cur ? "cur " : "") + (done ? "done" : "");
-      b.innerHTML = `<span></span><span class="st">${!p.ok ? "⚠️ needs fixing" : done ? "✓ Solved" : f ? `${f} / ${p.words.length + 1}` : "New ♥"}</span>`;
-      b.firstChild.textContent = `${i + 1}. ${P.title || P.theme}`;
-      b.onclick = () => { cur = i; store.set("current", cur); closeAll(); render(); };
-      li.appendChild(b); ul.appendChild(li); });
-    $("#pickerOv").classList.add("show");
-  }
-  function closeAll(){ document.querySelectorAll(".overlay").forEach(o => o.classList.remove("show")); }
+  function closeAll(){ document.querySelectorAll(".overlay").forEach(o => o.classList.remove("show")); clearInterval(countdownTimer); }
   document.querySelectorAll(".overlay").forEach(o => o.addEventListener("click", e => { if (e.target === o || e.target.hasAttribute("data-close")) closeAll(); }));
-  $("#menuBtn").onclick = openPicker; $("#helpBtn").onclick = () => $("#helpOv").classList.add("show");
-  $("#resetBtn").onclick = () => { if (!confirm("Restart this puzzle? Found words will be cleared.")) return; store.set(keyFor(cur), { found: [], guesses: [], hintsUsed: 0, hintWord: null }); closeAll(); render(); };
-  $("#winPick").onclick = () => { closeAll(); openPicker(); };
-  $("#winNext").onclick = () => { const n = nextUnsolved(); closeAll();
-    if (n === -1){ store.set(keyFor(cur), { found: [], guesses: [], hintsUsed: 0, hintWord: null }); } else cur = n; store.set("current", cur); render(); };
+  $("#helpBtn").onclick = () => $("#helpOv").classList.add("show");
+  $("#resetBtn").onclick = () => { if (!confirm("Restart this week's puzzle? Found words will be cleared.")) return; prog = { found: [], guesses: [], hintsUsed: 0, hintWord: null }; save(); closeAll(); render(); };
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeAll(); });
-  window.__strands = { prepared, get cur(){ return cur; } };
+  // If the page stays open across Monday midnight, load the new puzzle when she comes back.
+  if (!preview) document.addEventListener("visibilitychange", () => { if (!document.hidden && weekInfo(new Date(), SETTINGS).week !== week) location.reload(); });
+  window.__strands = { prep, week, cur, info, progKey };
   render();
-  if (!store.get("seenHelp", false)) { store.set("seenHelp", true); $("#helpOv").classList.add("show"); }
+  if (isDone()) setTimeout(() => showWin(false), 250);
+  else if (!store.get("seenHelp", false)) { store.set("seenHelp", true); $("#helpOv").classList.add("show"); }
 })();
 </script>
 </body>
